@@ -1,0 +1,84 @@
+server:
+  port: 8010
+
+spring:
+  application:
+    name: siteup-gateway
+  config:
+    import:
+      - "optional:nacos:${spring.application.name}.yaml"
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848 # Nacos Config 地址
+        file-extension: yaml
+        enabled: true
+        refresh-enabled: true # 启用配置热更新
+        group: DEFAULT_GROUP
+        namespace: "" # 空字符串使用默认命名空间
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: auth-route
+          uri: lb://siteup-auth
+          predicates:
+            - Path=/api/v1/auth/**
+        - id: biz-route
+          uri: lb://siteup-biz
+          predicates:
+            - Path=/api/v1/projects/**,/api/v1/templates/**,/api/v1/sites/**
+        - id: engine-route
+          uri: lb://siteup-engine
+          predicates:
+            - Path=/api/v1/generate/**
+        - id: sites-route
+          uri: lb://siteup-biz
+          predicates:
+            - Path=/api/v1/generated/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+# Sentinel configuration for circuit breaking and rate limiting
+sentinel:
+  transport:
+    dashboard: localhost:8080  # Sentinel dashboard address
+  eager: true  # Enable eager initialization
+  log:
+    dir: logs/sentinel/  # Sentinel log directory
+
+# Gateway authentication configuration
+gateway:
+  auth:
+    # 不需要鉴权的路径白名单（逗号分隔）
+    excluded-paths: "/api/v1/auth/register,/api/v1/auth/login,/api/v1/auth/verify,/api/v1/generated/**,/api/v1/templates/**"
+    # 引擎服务访问策略 (true=仅内部访问, false=允许直接访问)
+    engine-internal-only: true
+
+# Logging configuration for trace IDs and request IDs
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-},%X{X-Request-Id:-}]"
+  level:
+    com.siteup.gateway.filter: DEBUG
+    # 减少Nacos和Spring Cloud的日志输出
+    com.alibaba.nacos: WARN
+    org.springframework.cloud: WARN
+    org.springframework.web.client: WARN

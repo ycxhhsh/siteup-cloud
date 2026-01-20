@@ -1,0 +1,63 @@
+server:
+  port: 8020
+
+spring:
+  application:
+    name: siteup-auth
+  config:
+    import:
+      - "optional:nacos:${spring.application.name}.yaml"
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/siteup_auth?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: "123456"
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 # Nacos 地址
+        enabled: true
+      config:
+        server-addr: 127.0.0.1:8848 # Nacos Config 地址
+        file-extension: yaml
+        enabled: true
+        refresh-enabled: true
+        group: DEFAULT_GROUP
+        namespace: ""
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+# Sentinel configuration for circuit breaking and rate limiting
+sentinel:
+  transport:
+    dashboard: localhost:8080  # Sentinel dashboard address
+  eager: true  # Enable eager initialization
+  log:
+    dir: logs/sentinel/  # Sentinel log directory
+
+# Logging configuration for trace IDs
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

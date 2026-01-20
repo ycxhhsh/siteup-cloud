@@ -1,0 +1,246 @@
+{
+  "info": {
+    "name": "Component Renderer Test Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "测试新的策略模式组件渲染器：Button, Card, Text, Image"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8010"
+    }
+  ],
+  "item": [
+    {
+      "name": "测试新组件渲染器",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": {
+            "title": "组件渲染器测试页面",
+            "contentJson": {
+              "id": "root",
+              "type": "container",
+              "props": {
+                "className": "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4"
+              },
+              "children": [
+                {
+                  "id": "header",
+                  "type": "container",
+                  "props": {
+                    "className": "max-w-4xl mx-auto text-center mb-12"
+                  },
+                  "children": [
+                    {
+                      "id": "title",
+                      "type": "text",
+                      "props": {
+                        "text": "🎨 组件渲染器测试",
+                        "className": "text-5xl font-bold text-gray-900 mb-4"
+                      }
+                    },
+                    {
+                      "id": "subtitle",
+                      "type": "text",
+                      "props": {
+                        "text": "测试 Button, Card, Text, Image 组件的渲染效果",
+                        "className": "text-xl text-gray-600"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "demo-section",
+                  "type": "container",
+                  "props": {
+                    "className": "max-w-6xl mx-auto grid md:grid-cols-2 gap-8"
+                  },
+                  "children": [
+                    {
+                      "id": "button-demo",
+                      "type": "container",
+                      "props": {
+                        "className": "bg-white rounded-lg shadow-lg p-6"
+                      },
+                      "children": [
+                        {
+                          "id": "button-title",
+                          "type": "text",
+                          "props": {
+                            "text": "按钮组件测试",
+                            "className": "text-2xl font-bold mb-4"
+                          }
+                        },
+                        {
+                          "id": "button-primary",
+                          "type": "button",
+                          "props": {
+                            "text": "主要按钮",
+                            "variant": "primary",
+                            "link": "https://www.bilibili.com"
+                          }
+                        },
+                        {
+                          "id": "button-secondary",
+                          "type": "button",
+                          "props": {
+                            "text": "次要按钮",
+                            "variant": "secondary",
+                            "link": "https://www.deepseek.com"
+                          }
+                        },
+                        {
+                          "id": "button-no-link",
+                          "type": "button",
+                          "props": {
+                            "text": "无链接按钮"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "text-demo",
+                      "type": "container",
+                      "props": {
+                        "className": "bg-white rounded-lg shadow-lg p-6"
+                      },
+                      "children": [
+                        {
+                          "id": "text-title",
+                          "type": "text",
+                          "props": {
+                            "text": "文本组件测试",
+                            "className": "text-2xl font-bold mb-4"
+                          }
+                        },
+                        {
+                          "id": "text-normal",
+                          "type": "text",
+                          "props": {
+                            "text": "这是普通的文本段落，支持基本的格式化。"
+                          }
+                        },
+                        {
+                          "id": "text-large",
+                          "type": "text",
+                          "props": {
+                            "text": "这是大号文本",
+                            "className": "text-lg text-blue-600 font-semibold"
+                          }
+                        },
+                        {
+                          "id": "text-multiline",
+                          "type": "text",
+                          "props": {
+                            "text": "这是多行文本\n第二行\n第三行",
+                            "className": "text-sm text-gray-500 mt-4 p-3 bg-gray-50 rounded"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "image-demo",
+                      "type": "container",
+                      "props": {
+                        "className": "bg-white rounded-lg shadow-lg p-6"
+                      },
+                      "children": [
+                        {
+                          "id": "image-title",
+                          "type": "text",
+                          "props": {
+                            "text": "图片组件测试",
+                            "className": "text-2xl font-bold mb-4"
+                          }
+                        },
+                        {
+                          "id": "image-sample",
+                          "type": "image",
+                          "props": {
+                            "src": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=300&fit=crop",
+                            "alt": "示例图片"
+                          }
+                        },
+                        {
+                          "id": "image-placeholder",
+                          "type": "image",
+                          "props": {
+                            "src": "",
+                            "alt": "占位图片"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "card-demo",
+                      "type": "container",
+                      "props": {
+                        "className": "bg-white rounded-lg shadow-lg p-6"
+                      },
+                      "children": [
+                        {
+                          "id": "card-title",
+                          "type": "text",
+                          "props": {
+                            "text": "卡片组件测试",
+                            "className": "text-2xl font-bold mb-4"
+                          }
+                        },
+                        {
+                          "id": "card-with-image",
+                          "type": "card",
+                          "props": {
+                            "title": "带图片的卡片",
+                            "content": "这是一个包含图片和文字内容的卡片组件示例。",
+                            "image": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=250&fit=crop"
+                          }
+                        },
+                        {
+                          "id": "card-text-only",
+                          "type": "card",
+                          "props": {
+                            "title": "纯文字卡片",
+                            "content": "这是一个只有文字内容的卡片组件示例，用于展示简洁的设计风格。"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "footer",
+                  "type": "container",
+                  "props": {
+                    "className": "max-w-4xl mx-auto text-center mt-12 pt-8 border-t border-gray-200"
+                  },
+                  "children": [
+                    {
+                      "id": "footer-text",
+                      "type": "text",
+                      "props": {
+                        "text": "🎉 组件渲染器测试完成",
+                        "className": "text-lg text-gray-600"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/generate"
+        }
+      },
+      "response": []
+    }
+  ]
+}

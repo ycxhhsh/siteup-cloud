@@ -1,0 +1,62 @@
+server:
+  port: 8040
+
+spring:
+  application:
+    name: siteup-engine
+  config:
+    import:
+      - "optional:nacos:${spring.application.name}.yaml"
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/siteup_engine?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: "123456" # 注意：如果密码是纯数字，建议加引号，防止被解析错误
+  jpa:
+    hibernate:
+      ddl-auto: update # 自动更新表结构，非常适合开发阶段
+    show-sql: true     # 在控制台打印 SQL，方便调试
+    properties:
+      hibernate:
+        format_sql: true # 格式化打印的 SQL，更易读
+        dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848 # Nacos Config 地址
+        file-extension: yaml
+        enabled: true
+        refresh-enabled: true # 启用配置热更新
+        group: DEFAULT_GROUP
+        namespace: "" # 空字符串使用默认命名空间
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+# Sentinel configuration for circuit breaking and rate limiting
+sentinel:
+  transport:
+    dashboard: localhost:8080  # Sentinel dashboard address
+  eager: true  # Enable eager initialization
+  log:
+    dir: logs/sentinel/  # Sentinel log directory
+
+# Logging configuration for trace IDs
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

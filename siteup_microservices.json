@@ -1,0 +1,198 @@
+{
+	"info": {
+		"name": "SiteUp Cloud 专业版测试集 (网关统一鉴权)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"description": "基于微服务架构的标准化 E2E 测试集，网关统一鉴权，引擎服务仅内部访问。支持 Collection Runner 一键执行完整流程测试。"
+	},
+	"variable": [
+		{"key": "base_url", "value": "http://localhost:8010"},
+		{"key": "username", "value": "testuser_{{$timestamp}}"},
+		{"key": "password", "value": "test123456"},
+		{"key": "auth_token", "value": ""},
+		{"key": "project_id", "value": ""}
+	],
+	"item": [
+		{
+			"name": "01. 用户注册",
+			"event": [{
+				"listen": "test",
+				"script": {
+					"exec": [
+						"pm.test('注册状态码为 200 或 400 (已存在)', function () {",
+						"    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+						"});"
+					],
+					"type": "text/javascript"
+				}
+			}],
+			"request": {
+				"method": "POST",
+				"header": [{"key": "Content-Type", "value": "application/json"}],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"username\":\"{{username}}\", \"password\":\"{{password}}\"}"
+				},
+				"url": {"raw": "{{base_url}}/api/v1/auth/register"}
+			}
+		},
+		{
+			"name": "02. 用户登录",
+			"event": [{
+				"listen": "test",
+				"script": {
+					"exec": [
+						"var res = pm.response.json();",
+						"pm.test('登录成功并获得 Token', function () {",
+						"    pm.expect(res.success).to.be.true;",
+						"    pm.expect(res.token).to.not.be.empty;",
+						"});",
+						"if (res.token) {",
+						"    pm.collectionVariables.set('auth_token', 'Bearer ' + res.token);",
+						"}"
+					],
+					"type": "text/javascript"
+				}
+			}],
+			"request": {
+				"method": "POST",
+				"header": [{"key": "Content-Type", "value": "application/json"}],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"username\":\"{{username}}\", \"password\":\"{{password}}\"}"
+				},
+				"url": {"raw": "{{base_url}}/api/v1/auth/login"}
+			}
+		},
+		{
+			"name": "03. 从模板创建项目",
+			"event": [{
+				"listen": "test",
+				"script": {
+					"exec": [
+						"var res = pm.response.json();",
+						"pm.test('项目创建成功', function () {",
+						"    pm.expect(res.id).to.exist;",
+						"});",
+						"pm.collectionVariables.set('project_id', res.id);"
+					],
+					"type": "text/javascript"
+				}
+			}],
+			"request": {
+				"method": "POST",
+				"header": [
+					{"key": "Content-Type", "value": "application/json"},
+					{"key": "Authorization", "value": "{{auth_token}}"}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"自动化测试项目-{{$timestamp}}\"}"
+				},
+				"url": {"raw": "{{base_url}}/api/v1/templates/from-template/template-001"}
+			}
+		},
+		{
+			"name": "04. 发布项目",
+			"event": [{
+				"listen": "test",
+				"script": {
+					"exec": [
+						"pm.test('发布成功', function () {",
+						"    pm.expect(pm.response.json().success).to.be.true;",
+						"});"
+					],
+					"type": "text/javascript"
+				}
+			}],
+			"request": {
+				"method": "POST",
+				"header": [{"key": "Authorization", "value": "{{auth_token}}"}],
+				"url": {"raw": "{{base_url}}/api/v1/projects/{{project_id}}/publish"}
+			}
+		},
+		{
+			"name": "05. 验证网页内容",
+			"event": [{
+				"listen": "test",
+				"script": {
+					"exec": [
+						"pm.test('HTML 内容已生成', function () {",
+						"    pm.expect(pm.response.text()).to.include('<!DOCTYPE html>');",
+						"    pm.expect(pm.response.text().length).to.be.above(100);",
+						"});"
+					],
+					"type": "text/javascript"
+				}
+			}],
+			"request": {
+				"method": "GET",
+				"url": {"raw": "{{base_url}}/api/v1/generated/{{project_id}}"}
+			}
+		},
+		{
+			"name": "06. 测试网关鉴权 - 未授权访问",
+			"event": [{
+				"listen": "test",
+				"script": {
+					"exec": [
+						"pm.test('网关正确拦截未授权请求', function () {",
+						"    pm.expect(pm.response.code).to.be.eq(401);",
+						"});",
+						"var res = pm.response.json();",
+						"pm.test('返回统一错误格式', function () {",
+						"    pm.expect(res.code).to.be.eq('UNAUTHORIZED');",
+						"});"
+					],
+					"type": "text/javascript"
+				}
+			}],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {"raw": "{{base_url}}/api/v1/projects"}
+			}
+		},
+		{
+			"name": "07. 测试公开接口访问",
+			"event": [{
+				"listen": "test",
+				"script": {
+					"exec": [
+						"pm.test('公开接口无需鉴权即可访问', function () {",
+						"    pm.expect(pm.response.code).to.be.eq(200);",
+						"});"
+					],
+					"type": "text/javascript"
+				}
+			}],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {"raw": "{{base_url}}/api/v1/templates"}
+			}
+		},
+		{
+			"name": "08. 测试引擎服务保护",
+			"event": [{
+				"listen": "test",
+				"script": {
+					"exec": [
+						"pm.test('引擎服务拒绝直接访问', function () {",
+						"    pm.expect(pm.response.code).to.be.eq(403);",
+						"});",
+						"var res = pm.response.json();",
+						"pm.test('返回拒绝访问信息', function () {",
+						"    pm.expect(res.code).to.be.eq('FORBIDDEN');",
+						"});"
+					],
+					"type": "text/javascript"
+				}
+			}],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {"raw": "{{base_url}}/api/v1/generate/history"}
+			}
+		}
+	]
+}
